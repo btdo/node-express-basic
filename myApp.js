@@ -1,12 +1,15 @@
 
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({extended: false}));
 
 // --> 7)  Mount the Logger middleware here
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${req.ip}`);
   next();
-})
+});
 
 // --> 11)  Mount the body-parser middleware  here
 
@@ -36,7 +39,6 @@ app.use(express.static(__dirname + "/public"));
 
 /** 6) Use the .env file to configure the app */
 app.get("/json",(req, res) => {  
-  console.log(process.env.MESSAGE_STYLE || 'undefined');
   if (process.env.MESSAGE_STYLE === 'uppercase'){    
     res.json({"message": "Hello json".toUpperCase()});
   } else {
@@ -59,10 +61,23 @@ app.get('/now', (req, res, next) => {
 
 
 /** 9)  Get input from client - Route parameters */
+app.get('/:word/echo', (req, res) => {
+  res.json ({"echo": req.params.word});
+})
 
 
 /** 10) Get input from client - Query parameters */
 // /name?first=<firstname>&last=<lastname>
+const nameHandlerGet = (req, res) => {
+  res.json({"name": `${req.query.first} ${req.query.last}`});
+}
+
+const nameHandlerPost = (req, res) => {  
+  res.json({"name": `${req.body.first} ${req.body.last}`});
+}
+
+app.route('/name').get(nameHandlerGet).post(nameHandlerPost);
+
 
   
 /** 11) Get ready for POST Requests - the `body-parser` */
